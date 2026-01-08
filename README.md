@@ -98,7 +98,7 @@ Please ensure your code follows the existing style and includes clear commit mes
 
 ## Documentation
 
-Full docs, examples, and advanced usage are available on the [documentation site](https://github.com/Isaacprogi/routekeeper/docs/).
+Full docs, examples, and advanced usage are available on the [documentation site](https://isaacprogi.github.io/routekeeper/docs/routekeeper-vision).
 
 ## License
 

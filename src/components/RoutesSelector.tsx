@@ -72,7 +72,7 @@ export const RouteSelector: React.FC<RouteSelectorProps> = ({
         </select>
         
         <button
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-[#2a2a35] border border-[#3a3a45] text-[#e0e0e0] rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 hover:bg-[#3a3a45] hover:border-[#4a4a55] hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={onTestRoute}
           disabled={isTesting || !selectedRoute}
         >

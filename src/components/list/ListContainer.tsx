@@ -1,9 +1,11 @@
-// RouteTreeContainer.tsx - Styled version
+import { FaGlobe, FaLock, FaBolt} from 'react-icons/fa';
 import React, { useState, useEffect } from "react";
 import type { VisualRouteNode, RouteConfig } from "../../../utils/type";
 import { buildRouteGraph } from "../buildGraphRoute";
 import { List } from "./List";
 import { FaExpandAlt, FaCompressAlt, FaRedo, FaTree } from "react-icons/fa";
+import { LuRedo2 } from "react-icons/lu";
+
 
 type Props = {
   routes: RouteConfig[];
@@ -107,52 +109,60 @@ export const ListContainer: React.FC<Props> = ({
   return (
     <div className="bg-[#1a1a1f] min-h-screen">
       <div className="max-w-[95%] mx-auto py-4">
-        <div className="bg-[#1a1a1f]  rounded-lg mb-4">
-          {/* Tree Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {[
-              {
-                label: "Public",
-                count: graph.filter((n) => n.type === "public").length,
-                color: "#4caf50",
-                bg: "bg-[#4caf50]/10",
-              },
-              {
-                label: "Private",
-                count: graph.filter((n) => n.type === "private").length,
-                color: "#ef5350",
-                bg: "bg-[#ef5350]/10",
-              },
-              {
-                label: "Lazy",
-                count: graph.filter((n) => n.lazy).length,
-                color: "#ffc107",
-                bg: "bg-[#ffc107]/10",
-              },
-              {
-                label: "Redirect",
-                count: graph.filter((n) => n.redirectTo).length,
-                color: "#9c27b0",
-                bg: "bg-[#9c27b0]/10",
-              },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className={`px-3 py-4 rounded ${stat.bg} border border-[#2a2a2a]`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#a0a0a0]">{stat.label}</span>
-                  <span
-                    className="text-sm font-semibold"
-                    style={{ color: stat.color }}
-                  >
-                    {stat.count}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+
+<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+  {[
+    {
+      icon: FaGlobe,
+      label: "Public",
+      count: graph.filter((n) => n.type === "public").length,
+      color: "#4caf50",
+      bg: "bg-[#4caf50]/10",
+      border: "border-[#4caf50]/30"
+    },
+    {
+      icon: FaLock,
+      label: "Private",
+      count: graph.filter((n) => n.type === "private").length,
+      color: "#ef5350",
+      bg: "bg-[#ef5350]/10",
+      border: "border-[#ef5350]/30"
+    },
+    {
+      icon: FaBolt,
+      label: "Lazy",
+      count: graph.filter((n) => n.lazy).length,
+      color: "#ffc107",
+      bg: "bg-[#ffc107]/10",
+      border: "border-[#ffc107]/30"
+    },
+    {
+      icon: LuRedo2,
+      label: "Redirect",
+      count: graph.filter((n) => n.redirectTo).length,
+      color: "#9c27b0",
+      bg: "bg-[#9c27b0]/10",
+      border: "border-[#9c27b0]/30"
+    }
+  ].map((stat) => (
+    <div 
+      key={stat.label} 
+      className={`border rounded-lg p-3 ${stat.bg} border border-[#2a2a2a]`}
+    >
+      <div className="flex items-center gap-3">
+        <div className={`p-2 rounded ${stat.bg.replace('/10', '/20')} border border-[#2a2a2a]`}>
+          <stat.icon className="w-4 h-4" style={{ color: stat.color }} />
         </div>
+        <div className="flex items-center gap-2">
+          <div className="text-xl font-bold text-[#e0e0e0]">{stat.count}</div>
+          <div className="text-xs text-[#a0a0a0] mt-0.5">{stat.label}</div>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+          {/* Tree Stats */}
+         
 
         {/* Controls */}
         <div className="flex flex-wrap gap-3 items-center justify-between mb-4 p-3 border border-[#2a2a2a] rounded-lg bg-[#202025]">

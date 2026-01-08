@@ -8,9 +8,9 @@ import {
   FaChartBar,
   FaInfoCircle,
 } from "react-icons/fa";
-import { HiOutlineArrowRight } from "react-icons/hi";
 import type { Scenario } from "../../../utils/type";
 import React, { useState } from "react";
+import { LuRedo2 } from "react-icons/lu";
 
 type Props = {
   routes: string|unknown[];
@@ -25,7 +25,7 @@ type TabType = 'unauthenticated' | 'authenticated';
 const mapIcon = (result?: { access: string }) => {
   if (!result) return <FaMinus className="w-4 h-4 text-[#888]" />;
   if (result.access === "allow") return <FaCheckCircle className="w-4 h-4 text-[#4caf50]" />;
-  if (result.access === "redirect") return <HiOutlineArrowRight className="w-4 h-4 text-[#9c27b0]" />;
+  if (result.access === "redirect") return <LuRedo2  className="w-4 h-4 text-[#9c27b0]" />;
   return <FaTimesCircle className="w-4 h-4 text-[#ef5350]" />;
 };
 
@@ -188,7 +188,7 @@ const Legend: React.FC = () => (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {[
         { icon: FaCheckCircle, color: '#4caf50', label: 'Allow', bg: 'bg-[#4caf50]/10', border: 'border-[#4caf50]/30' },
-        { icon: HiOutlineArrowRight, color: '#9c27b0', label: 'Redirect', bg: 'bg-[#9c27b0]/10', border: 'border-[#9c27b0]/30' },
+        { icon: LuRedo2 , color: '#9c27b0', label: 'Redirect', bg: 'bg-[#9c27b0]/10', border: 'border-[#9c27b0]/30' },
         { icon: FaTimesCircle, color: '#ef5350', label: 'Deny', bg: 'bg-[#ef5350]/10', border: 'border-[#ef5350]/30' },
         { icon: FaMinus, color: '#888', label: 'Missing', bg: 'bg-[#2a2a35]', border: 'border-[#2a2a2a]' }
       ].map((item) => (
