@@ -1,170 +1,96 @@
 // visualizer/RouteEditor.tsx
-import React, { useState } from "react";
+import React from "react";
 import type { VisualRouteNode } from "../../utils/type";
-import "../../styles/RouteVisualizer.css";
 
 type Props = {
   node: VisualRouteNode;
-  onUpdate: (updatedNode: VisualRouteNode) => void;
 };
 
-export const RouteEditor: React.FC<Props> = ({ node, onUpdate }) => {
-  const [editing, setEditing] = useState(false);
-  const [editedNode, setEditedNode] = useState({ ...node });
-
-
-  const handleChange = (field: keyof VisualRouteNode, value: any) => {
-    setEditedNode(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleRolesChange = (roles: string) => {
-    const rolesArray = roles.split(',').map(r => r.trim()).filter(r => r);
-    handleChange('roles', rolesArray);
-  };
-
-  const renderField = (label: string, value: any, field?: keyof VisualRouteNode) => {
-    if (editing && field) {
-      const inputProps = {
-        value: value,
-        onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => 
-          handleChange(field, e.target.value),
-        className: "editor-input"
-      };
-
-      if (field === 'type') {
-        return (
-          <select {...inputProps}>
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-            <option value="neutral">Neutral</option>
-          </select>
-        );
-      }
-
-      if (field === 'lazy') {
-        return (
-          <select
-            value={value ? 'true' : 'false'}
-            onChange={(e) => handleChange(field, e.target.value === 'true')}
-            className="editor-input"
-          >
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-        );
-      }
-
-      if (field === 'roles') {
-        return (
-          <input
-            type="text"
-            value={Array.isArray(value) ? value.join(', ') : value}
-            onChange={(e) => handleRolesChange(e.target.value)}
-            className="editor-input"
-            placeholder="admin, user, guest (comma separated)"
-          />
-        );
-      }
-
-      return <input type="text" {...inputProps} />;
-    }
-
-    return <span className="field-value">{Array.isArray(value) ? value.join(', ') : String(value)}</span>;
-  };
-
+export const RouteEditor: React.FC<Props> = ({ node }) => {
   const PropertySection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-    <div className="property-section">
-      <h4>{title}</h4>
+    <div className="mb-6 pb-5 border-b border-[#2a2a2a] last:border-0 last:mb-0">
+      <h4 className="m-0 mb-4 text-white text-sm uppercase tracking-wider font-semibold">{title}</h4>
       {children}
     </div>
   );
 
   return (
-    <div className="route-editor">
+    <div className="w-full h-full flex flex-col bg-[#1a1a1f]">
       
-      <div className="editor-header">
-        <h3>
+      <div className="px-6 py-5 border-b border-[#2a2a2a] bg-[#25252d]">
+        <h3 className="m-0 mb-1 text-white text-lg flex items-center justify-between">
           {node.index ? 'Index Route' : node.path || 'Root'}
-          <span className="editor-subtitle">Route Details</span>
+          <span className="text-xs text-[#888] font-normal ml-2">Route Details</span>
         </h3>
-        {/* <div className="editor-controls">
-          {!editing ? (
-            <button onClick={() => setEditing(true)} className="edit-btn">
-              ✏️ Edit
-            </button>
-          ) : (
-            <>
-              <button onClick={handleSave} className="save-btn">
-                💾 Save
-              </button>
-              <button onClick={handleCancel} className="cancel-btn">
-                ❌ Cancel
-              </button>
-            </>
-          )}
-        </div> */}
       </div>
 
-      <div className="editor-content">
+      <div className="flex-1 overflow-y-auto p-6">
         <PropertySection title="Basic Information">
-          <div className="property-row">
-            <label>Path:</label>
-            {renderField('Path', node.path, 'path')}
+          <div className="flex items-start mb-3 text-sm">
+            <label className="w-36 text-[#a0a0a0] font-medium flex-shrink-0 pt-0.5">Path:</label>
+            <span className="text-white text-sm break-words flex-1">{node.path || '-'}</span>
           </div>
-          <div className="property-row">
-            <label>Full Path:</label>
-            <span className="field-value">{node.fullPath}</span>
+          <div className="flex items-start mb-3 text-sm">
+            <label className="w-36 text-[#a0a0a0] font-medium flex-shrink-0 pt-0.5">Full Path:</label>
+            <span className="text-white text-sm break-words flex-1">{node.fullPath}</span>
           </div>
-          <div className="property-row">
-            <label>Type:</label>
-            {renderField('Type', node.type, 'type')}
+          <div className="flex items-start mb-3 text-sm">
+            <label className="w-36 text-[#a0a0a0] font-medium flex-shrink-0 pt-0.5">Type:</label>
+            <span className="text-white text-sm break-words flex-1">{node.type}</span>
           </div>
-          <div className="property-row">
-            <label>Index Route:</label>
-            <span className="field-value">{node.index ? 'Yes' : 'No'}</span>
+          <div className="flex items-start mb-3 text-sm">
+            <label className="w-36 text-[#a0a0a0] font-medium flex-shrink-0 pt-0.5">Index Route:</label>
+            <span className="text-white text-sm break-words flex-1">{node.index ? 'Yes' : 'No'}</span>
           </div>
         </PropertySection>
 
         <PropertySection title="Access Control">
-          <div className="property-row">
-            <label>Route Roles:</label>
-            {renderField('Roles', node.roles, 'roles')}
+          <div className="flex items-start mb-3 text-sm">
+            <label className="w-36 text-[#a0a0a0] font-medium flex-shrink-0 pt-0.5">Route Roles:</label>
+            <span className="text-white text-sm break-words flex-1">
+              {node.roles.length > 0 ? node.roles.join(', ') : 'None'}
+            </span>
           </div>
-          <div className="property-row">
-            <label>Allowed Roles:</label>
-            <span className="field-value">
+          <div className="flex items-start mb-3 text-sm">
+            <label className="w-36 text-[#a0a0a0] font-medium flex-shrink-0 pt-0.5">Allowed Roles:</label>
+            <span className="text-white text-sm break-words flex-1">
               {node.inheritedRoles.length > 0 ? node.inheritedRoles.join(', ') : 'None'}
             </span>
           </div>
         </PropertySection>
 
         <PropertySection title="Behavior">
-          <div className="property-row">
-            <label>Lazy Loaded:</label>
-            {renderField('Lazy', node.lazy, 'lazy')}
+          <div className="flex items-start mb-3 text-sm">
+            <label className="w-36 text-[#a0a0a0] font-medium flex-shrink-0 pt-0.5">Lazy Loaded:</label>
+            <span className="text-white text-sm break-words flex-1">{node.lazy ? 'Yes' : 'No'}</span>
           </div>
-          <div className="property-row">
-            <label>Redirect To:</label>
-            {renderField('Redirect To', node.redirectTo || 'None', 'redirectTo')}
+          <div className="flex items-start mb-3 text-sm">
+            <label className="w-36 text-[#a0a0a0] font-medium flex-shrink-0 pt-0.5">Redirect To:</label>
+            <span className="text-white text-sm break-words flex-1">{node.redirectTo?.pathname || 'None'}</span>
           </div>
         </PropertySection>
 
         <PropertySection title="Children">
-          <div className="property-row">
-            <label>Children Count:</label>
-            <span className="field-value">{node.children.length}</span>
+          <div className="flex items-start mb-3 text-sm">
+            <label className="w-36 text-[#a0a0a0] font-medium flex-shrink-0 pt-0.5">Children Count:</label>
+            <span className="text-white text-sm break-words flex-1">{node.children.length}</span>
           </div>
           {node.children.length > 0 && (
-            <div className="children-list">
-              <h5>Child Routes:</h5>
-              <ul>
+            <div className="mt-3">
+              <h5 className="m-0 mb-2 text-[#a0a0a0] text-xs font-semibold">Child Routes:</h5>
+              <ul className="p-0 m-0 list-none">
                 {node.children.map(child => (
-                  <li key={child.id}>
-                    <span className="child-path">{child.path || '(index)'}</span>
-                    <span className={`child-type ${child.type}`}>{child.type}</span>
+                  <li key={child.id} className="flex justify-between items-center px-2 py-1.5 bg-[#2a2a35] rounded mb-1 last:mb-0">
+                    <span className="font-mono text-xs text-white">{child.path || '(index)'}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase ${
+                      child.type === 'private' 
+                        ? 'bg-[rgba(239,83,80,0.2)] text-[#ef5350]' 
+                        : child.type === 'public' 
+                        ? 'bg-[rgba(76,175,80,0.2)] text-[#4caf50]' 
+                        : 'bg-[rgba(158,158,158,0.2)] text-[#9e9e9e]'
+                    }`}>
+                      {child.type}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -173,9 +99,9 @@ export const RouteEditor: React.FC<Props> = ({ node, onUpdate }) => {
         </PropertySection>
 
         <PropertySection title="Metadata">
-          <div className="property-row">
-            <label>Node ID:</label>
-            <span className="field-value monospace">{node.id}</span>
+          <div className="flex items-start mb-3 text-sm">
+            <label className="w-36 text-[#a0a0a0] font-medium flex-shrink-0 pt-0.5">Node ID:</label>
+            <span className="font-mono text-xs text-white break-words flex-1">{node.id}</span>
           </div>
         </PropertySection>
       </div>

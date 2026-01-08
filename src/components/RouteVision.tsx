@@ -4,11 +4,17 @@ import { buildRouteGraph } from "./buildGraphRoute";
 import { ListContainer } from "./list/ListContainer";
 import { RouteTree } from "./tree/RouteTree";
 import { RouteEditor } from "./RouteEditor";
-import Logo from "../../asset/logo.jpg";
+import {
+  routesUseRoles,
+  buildScenarios,
+  simulateRoutes,
+  processSimulationResults,
+} from "../../src/components/simulate/functions";
 import { RouteSimulationTable } from "./simulate/RouteSimulationTable";
 import RouteMountPanel from "./mount/RouteMountPanel";
-import type { RouteTiming } from "../../utils/type";
 import IssuesPanel from "./issues/issues";
+import Logo from '../assets/logo.jpg'
+import { useMobile } from "./hooks/useMobile";
 
 import {
   FaChevronLeft,
@@ -17,20 +23,9 @@ import {
   FaList,
   FaPlayCircle,
   FaHeartbeat,
-  FaExclamationCircle,
+  FaExclamationCircle
 } from "react-icons/fa";
-import {
-  routesUseRoles,
-  buildScenarios,
-  simulateRoutes,
-  processSimulationResults,
-} from "./simulate/functions";
-
-type Props = {
-  routes: RouteConfig[];
-  timingRecords: RouteTiming[];
-  setTimingRecords: React.Dispatch<React.SetStateAction<RouteTiming[]>>;
-};
+import type { RouteVisionProps } from "../../utils/type";
 
 type ViewMode = "vertical" | "tree" | "simulate" | "mount" | "issues";
 
@@ -40,20 +35,41 @@ const STORAGE_KEYS = {
   PANEL_STATE: "routekeeper_panel_state",
 };
 
-export const RouteKeeperVision: React.FC<Props> = ({
+export const RouteKeeperVision: React.FC<RouteVisionProps> = ({
   routes,
   timingRecords,
   setTimingRecords,
+  issues,setIssues,testingMode,toggleTestingMode
 }) => {
-  const [viewMode, setViewMode] = useState<ViewMode>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.VIEW_MODE);
-    return (saved as ViewMode) || "vertical";
-  });
+  // const [viewMode, setViewMode] = useState<ViewMode>(() => {
+  //   const saved = localStorage.getItem(STORAGE_KEYS.VIEW_MODE);
+  //   return (saved as ViewMode) || "vertical";
+  // });
 
-  const [openPanel, setOpenPanel] = useState<boolean>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PANEL_STATE);
-    return saved ? JSON.parse(saved) : true;
-  });
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+  if (typeof window === "undefined") return "vertical"; // <-- safe default
+  const saved = localStorage.getItem(STORAGE_KEYS.VIEW_MODE);
+  return (saved as ViewMode) || "vertical";
+});
+
+const [openPanel, setOpenPanel] = useState<boolean>(() => {
+  if (typeof window === "undefined") return true; // safe default
+  const saved = localStorage.getItem(STORAGE_KEYS.PANEL_STATE);
+  return saved ? JSON.parse(saved) : true;
+});
+
+  // For vertical view
+  const [graph] = useState(() => buildRouteGraph(routes));
+  const [selectedNode, setSelectedNode] = useState<VisualRouteNode | null>(
+    null
+  );
+  console.log("jjssjs")
+
+  // const [openPanel, setOpenPanel] = useState<boolean>(() => {
+  //   const saved = localStorage.getItem(STORAGE_KEYS.PANEL_STATE);
+  //   return saved ? JSON.parse(saved) : true;
+  // });
+  const isMobile = useMobile(1024);
 
   // Save to localStorage whenever state changes
   useEffect(() => {
@@ -79,6 +95,12 @@ export const RouteKeeperVision: React.FC<Props> = ({
       authScenarios: processSimulationResults(authResults),
     };
   }, [routes, scenarios]);
+
+  useEffect(()=>{
+    if(!openPanel){
+      setOpenPanel(true)
+    }
+  },[selectedNode])
 
   // Extract all unique route paths
   const routePaths = useMemo(() => {
@@ -112,11 +134,6 @@ export const RouteKeeperVision: React.FC<Props> = ({
     return Array.from(paths).sort();
   }, [routes]);
 
-  // For vertical view
-  const [graph] = useState(() => buildRouteGraph(routes));
-  const [selectedNode, setSelectedNode] = useState<VisualRouteNode | null>(
-    null
-  );
 
   // Handle view mode change
   const handleViewModeChange = (mode: ViewMode) => {
@@ -131,13 +148,8 @@ export const RouteKeeperVision: React.FC<Props> = ({
     setSelectedNode(node);
   };
 
-  const condition =
-    openPanel &&
-    viewMode !== "mount" &&
-    viewMode !== "issues" &&
-    viewMode !== "simulate";
-  const keepWidth =
-    viewMode !== "mount" && viewMode !== "issues" && viewMode !== "simulate";
+  const condition = openPanel && viewMode !== "mount" && viewMode !== "issues" && viewMode !== "simulate";
+  const keepWidth = viewMode !== "mount" && viewMode !== "issues" && viewMode !== "simulate";
 
   return (
     <div className="font-['Fira_Code','JetBrains_Mono','Source_Code_Pro','Roboto_Mono',monospace] h-screen flex flex-col bg-[#0f0f12] text-[#e0e0e0] font-medium text-sm leading-relaxed">
@@ -145,8 +157,8 @@ export const RouteKeeperVision: React.FC<Props> = ({
       <div className="px-6 py-4 border-b border-[#2a2a2a] bg-[#1a1a1f] sticky top-0 z-10 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <img src={Logo} alt="" className="h-8 w-8 rounded-lg" />
-          <h2 className="m-0 text-white font-semibold text-lg">
-            RouteKeeper Vision
+          <h2 className="m-0 flex hidden gap-5 lg:block text-white font-semibold text-lg">
+           <span className="text-purple-300"> RouteKeeper</span>  <span className="text-purple-300">Vision</span>
           </h2>
         </div>
 
@@ -155,62 +167,88 @@ export const RouteKeeperVision: React.FC<Props> = ({
             <button
               className={`p-3 flex items-center gap-2 border border-[#4a4a55] rounded-lg relative transition-all duration-200 ${
                 viewMode === "vertical"
-                  ? "bg-gradient-to-br from-[#3a3a45] to-[#2a2a35] text-[#64b5f6] font-semibold shadow-md"
+                  ? "bg-gradient-to-br from-[#3a3a45] to-[#2a2a35] text-purple-300 font-semibold shadow-md"
                   : "hover:bg-[#353540] hover:text-gray-300 text-[#a0a0a0] hover:shadow-md hover:border-[#5a5a65]"
               }`}
               onClick={() => handleViewModeChange("vertical")}
               title="Vertical Tree View"
             >
-              Tree Diagram
+               <span className="hidden md:block">Tree Diagram</span>
               <FaSitemap className="mode-icon" />
             </button>
             <button
               className={`p-3 flex items-center gap-2 border border-[#4a4a55] rounded-lg relative transition-all duration-200 ${
                 viewMode === "tree"
-                  ? "bg-gradient-to-br from-[#3a3a45] to-[#2a2a35] text-[#64b5f6] font-semibold shadow-md "
+                  ? "bg-gradient-to-br from-[#3a3a45] to-[#2a2a35] text-purple-300 font-semibold shadow-md"
                   : "hover:bg-[#353540] hover:text-gray-300 text-[#a0a0a0] hover:shadow-md hover:border-[#5a5a65]"
               }`}
               onClick={() => handleViewModeChange("tree")}
               title="Tree View"
             >
-              List View
+             <span className="hidden md:block"> List View</span>
               <FaList className="mode-icon" />
             </button>
             <button
               className={`p-3 flex items-center gap-2 border border-[#4a4a55] rounded-lg relative transition-all duration-200 ${
                 viewMode === "simulate"
-                  ? "bg-gradient-to-br from-[#3a3a45] to-[#2a2a35] text-[#64b5f6] font-semibold shadow-md"
+                  ? "bg-gradient-to-br from-[#3a3a45] to-[#2a2a35] text-purple-300 font-semibold shadow-md"
                   : "hover:bg-[#353540] hover:text-gray-300 text-[#a0a0a0] hover:shadow-md hover:border-[#5a5a65]"
               }`}
               onClick={() => handleViewModeChange("simulate")}
               title="Simulation View"
             >
-              Simulation
+              <span className="hidden md:block">Simulation</span>
               <FaPlayCircle className="mode-icon" />
             </button>
             <button
               className={`p-3 flex items-center gap-2 border border-[#4a4a55] rounded-lg relative transition-all duration-200 ${
                 viewMode === "mount"
-                  ? "bg-gradient-to-br from-[#3a3a45] to-[#2a2a35] text-[#64b5f6] font-semibold shadow-md"
+                  ? "bg-gradient-to-br from-[#3a3a45] to-[#2a2a35] text-purple-300 font-semibold shadow-md"
                   : "hover:bg-[#353540] hover:text-gray-300 text-[#a0a0a0] hover:shadow-md hover:border-[#5a5a65]"
               }`}
               onClick={() => handleViewModeChange("mount")}
               title="Mount View"
             >
-              Mount test
+              <span className="hidden md:block">Test</span>
               <FaHeartbeat className="mode-icon" />
             </button>
             <button
               className={`p-3 flex items-center gap-2 border border-[#4a4a55] rounded-lg relative transition-all duration-200 ${
                 viewMode === "issues"
-                  ? "bg-gradient-to-br from-[#3a3a45] to-[#2a2a35] text-[#64b5f6] font-semibold shadow-md"
+                  ? "bg-gradient-to-br from-[#3a3a45] to-[#2a2a35] text-purple-300 shadow-md font-semibold "
                   : "hover:bg-[#353540] hover:text-gray-300 text-[#a0a0a0] hover:shadow-md hover:border-[#5a5a65]"
               }`}
               onClick={() => handleViewModeChange("issues")}
               title="Issues View"
             >
-              Issues
+              <span className="hidden md:block">Issues</span>
               <FaExclamationCircle className="mode-icon" />
+            </button>
+
+             <button
+              className={`
+                flex lg:hidden items-center justify-center
+                w-10 h-10 text-[#e0e0e0]
+                border border-[#2a2a2a] rounded-lg
+                cursor-pointer
+                transition-all duration-200
+                bg-[#1a1a1f] hover:bg-[#2a2a35]
+                hover:border-[#3a3a45] hover:text-white
+                active:scale-95
+                p-3
+                focus:outline-none focus:ring-2 focus:ring-[#64b5f6]/50
+                shadow-sm hover:shadow-md
+                ${!condition ? "" : ""}
+              `}
+              onClick={togglePanel}
+              aria-label={condition ? "Collapse panel" : "Expand panel"}
+              title={condition ? "Collapse Panel" : "Expand Panel"}
+            >
+              {condition ? (
+                <FaChevronRight className="w-4 h-4" />
+              ) : (
+                <FaChevronLeft className="w-4 h-4" />
+              )}
             </button>
           </div>
         </div>
@@ -220,7 +258,7 @@ export const RouteKeeperVision: React.FC<Props> = ({
         {/* LEFT: MAIN CONTENT */}
         <div
           className={`bg-[#1a1a1f] relative transition-all duration-300 ease-in-out overflow-hidden ${
-            condition ? "w-[calc(100%-24rem)]" : "w-full"
+            condition ? "w-full lg:w-[calc(100%-30rem)]" : "w-full"
           }`}
         >
           <div className="h-full overflow-y-auto border-r border-[#2a2a2a] pr-1">
@@ -241,9 +279,12 @@ export const RouteKeeperVision: React.FC<Props> = ({
                 routes={routePaths}
                 setTimingRecords={setTimingRecords}
                 timingRecords={timingRecords}
+                testingMode={testingMode}
+                toggleTestingMode={toggleTestingMode}
+            
               />
             ) : viewMode === "issues" ? (
-              <IssuesPanel />
+              <IssuesPanel issues={issues} setIssues={setIssues} />
             ) : (
               <RouteTree
                 routes={graph}
@@ -253,18 +294,51 @@ export const RouteKeeperVision: React.FC<Props> = ({
             )}
           </div>
         </div>
+         {/* RIGHT PANEL MOBILE */}
+        {
+          isMobile &&
+          <div
+          className={` fixed z-[400] inset-0 top-[4.3rem]  lg:hidden bg-[#1a1a1f] overflow-y-auto transition-all duration-300 ease-in-out border-l border-[#2a2a2a] ${
+            condition
+              ? "w-full opacity-100 shadow-lg"
+              : `${keepWidth ? "w-[0rem] opacity-100" : "w-[0rem] opacity-0"}`
+          }`}
+          >
+          
+
+          <div className={`mt-2 ${condition ? "block" : "hidden"}`}>
+            {selectedNode ? (
+              <RouteEditor
+                node={selectedNode}
+              />
+            ) : (
+              <div className="h-full flex flex-col mt-[2rem] items-center justify-center p-10 text-center">
+                <div className="text-5xl mb-4 opacity-30">
+                  {viewMode === "vertical" ? "🌳" : "📋"}
+                </div>
+                <h3 className="m-0 mb-2 text-[#a0a0a0] font-semibold">Select a Route</h3>
+                <p className="m-0 text-sm text-[#888] max-w-[80%]">
+                  Click on any route in the tree to view and edit its properties
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+        }
 
         {/* RIGHT: EDITOR PANEL */}
-        <div
-          className={`flex-shrink-0 bg-[#1a1a1f] overflow-y-auto transition-all duration-300 ease-in-out border-l border-[#2a2a2a] ${
+        {
+          !isMobile &&
+          <div
+          className={`flex-shrink-0 hidden lg:block bg-[#1a1a1f] overflow-y-auto transition-all duration-300 ease-in-out border-l border-[#2a2a2a] ${
             condition
-              ? "w-96 opacity-100 shadow-lg"
+              ? "w-[30rem] opacity-100 shadow-lg"
               : `${keepWidth ? "w-[4rem] opacity-100" : "w-[0rem] opacity-0"}`
           }`}
-        >
+          >
           <div
             className={`
-              flex items-center justify-between py-3 px-3
+              flex items-center bg-[#202025]  justify-between py-3 px-3
               ${
                 !condition
                   ? "h-full flex-col gap-4"
@@ -301,31 +375,24 @@ export const RouteKeeperVision: React.FC<Props> = ({
             {!condition && (
               <div
                 className="text-4xl transition-opacity duration-200 opacity-70 hover:opacity-100 cursor-default"
-                title={`View mode: ${
-                  viewMode === "vertical" ? "Tree" : "List"
-                }`}
+                title={`View mode: ${viewMode === "vertical" ? "Tree" : "List"}`}
               >
                 {viewMode === "vertical" ? "🌳" : "📋"}
               </div>
             )}
           </div>
 
-          <div className={`${condition ? "block" : "hidden"}`}>
+          <div className={` ${condition ? "block" : "hidden"}`}>
             {selectedNode ? (
               <RouteEditor
                 node={selectedNode}
-                onUpdate={(updatedNode) => {
-                  handleNodeSelect(updatedNode);
-                }}
               />
             ) : (
               <div className="h-full flex flex-col mt-[2rem] items-center justify-center p-10 text-center">
                 <div className="text-5xl mb-4 opacity-30">
                   {viewMode === "vertical" ? "🌳" : "📋"}
                 </div>
-                <h3 className="m-0 mb-2 text-[#a0a0a0] font-semibold">
-                  Select a Route
-                </h3>
+                <h3 className="m-0 mb-2 text-[#a0a0a0] font-semibold">Select a Route</h3>
                 <p className="m-0 text-sm text-[#888] max-w-[80%]">
                   Click on any route in the tree to view and edit its properties
                 </p>
@@ -333,6 +400,7 @@ export const RouteKeeperVision: React.FC<Props> = ({
             )}
           </div>
         </div>
+        }
       </div>
     </div>
   );

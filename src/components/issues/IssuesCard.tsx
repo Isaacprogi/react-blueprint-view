@@ -111,14 +111,14 @@ const IssuesCard: React.FC<IssuesComponentProps> = ({
             <p className="text-xs text-[#888]">
               {issues.length === 1 ? '1 issue found' : `${issues.length} issues found`}
             </p>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <button className="text-xs px-3 py-1 rounded border border-[#2a2a2a] text-[#888] hover:text-[#e0e0e0] hover:border-[#3a3a3a] transition-colors">
                 Export
               </button>
               <button className="text-xs px-3 py-1 rounded bg-[#2a2a2a] text-[#e0e0e0] hover:bg-[#3a3a3a] transition-colors">
                 Resolve All
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       )}

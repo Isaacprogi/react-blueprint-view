@@ -1,13 +1,9 @@
 // import React, { useState } from "react";
-// import { useNavigate, useLocation } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 // import { 
-//   FaRoute, 
-//   FaClock, 
-//   FaExclamationTriangle, 
 //   FaInfoCircle, 
 //   FaPlay,
 //   FaSpinner,
-//   FaHistory
 // } from "react-icons/fa";
 
 // interface RouteTiming {
@@ -23,29 +19,29 @@
 //   };
 // }
 
-// interface RouteHealthPanelProps {
-//   routes: string[];
+// interface SingleTestProps {
+//   routes: string[] | unknown;
 //   timingRecords: RouteTiming[];
+//   setTimingRecords: React.Dispatch<React.SetStateAction<RouteTiming[] | undefined>>;
 // }
 
-// export const RouteHealthPanel: React.FC<RouteHealthPanelProps> = ({
+// export const SingleTest: React.FC<SingleTestProps> = ({
 //   routes,
 //   timingRecords,
+//   setTimingRecords
 // }) => {
-//   const navigate = useNavigate();
-//   const location = useLocation();
-//   const [selectedRoute, setSelectedRoute] = useState<string>("");
+//   const navigate = useNavigate()
+
+
+//   const [selectedRoute, setSelectedRoute] = useState<string>('');
 //   const [isTesting, setIsTesting] = useState<boolean>(false);
-//   const [showRecentOnly, setShowRecentOnly] = useState<boolean>(true);
-  
-//   console.log("RouteHealthPanel data:", { routes, timingRecords });
 
 //   // Get latest test record for the selected route
 //   const getLatestTestRecord = () => {
 //     if (!selectedRoute) return null;
     
 //     const filteredRecords = timingRecords.filter(record => 
-//       record.intendedPath === selectedRoute || record.path === selectedRoute
+//       record.intendedPath === selectedRoute 
 //     );
     
 //     if (filteredRecords.length === 0) return null;
@@ -59,9 +55,9 @@
 //   const latestTestRecord = getLatestTestRecord();
 
 //   // Filter to show only the latest test record when a route is selected
-//   const displayRecords = selectedRoute && latestTestRecord 
+//   const displayRecords =  latestTestRecord 
 //     ? [latestTestRecord] 
-//     : timingRecords;
+//     : [];
 
 //   // Sort all records by timestamp (newest first)
 //   const sortedRecords = [...displayRecords].sort((a, b) => 
@@ -90,40 +86,36 @@
 //     return "bg-[#ef5350]/10";
 //   };
 
-//   // Calculate average load time
-//   const averageLoadTime = timingRecords.length > 0 
-//     ? Math.round(timingRecords.reduce((acc, r) => acc + r.loadTime, 0) / timingRecords.length)
-//     : 0;
-
 //   return (
-//     <div className="p-4 bg-[#1a1a1f] min-h-screen">
+//     <div className="bg-[#1a1a1f] min-h-screen">
 //       <div className="space-y-4">
 //         {/* Route Selector and Test Button */}
-//         <div className="bg-[#1a1a1f] border border-[#2a2a2a] rounded p-4">
-//           <div className="flex items-center justify-between mb-4">
-//             <div className="flex items-center gap-2">
-//               <FaRoute className="w-5 h-5 text-[#64b5f6]" />
-//               <h3 className="text-lg font-semibold text-[#e0e0e0]">Route Testing</h3>
-//             </div>
-            
-//             <div className="flex items-center gap-2 text-sm text-[#888]">
-//               <FaHistory className="w-4 h-4" />
-//               <span>{timingRecords.length} records</span>
-//             </div>
-//           </div>
-          
-//           <div className="flex items-center gap-3">
+//         <div className="bg-[#1a1a1f] border-b border-[#2a2a2a]">
+//           <div className="flex w-full py-3 max-w-[95%] mx-auto items-center gap-3">
 //             <div className="flex-1">
 //               <select
 //                 className="w-full bg-[#0f0f12] border border-[#2a2a2a] rounded px-3 py-2 text-sm text-[#e0e0e0] font-mono focus:outline-none focus:ring-1 focus:ring-[#64b5f6] focus:border-[#64b5f6]"
 //                 value={selectedRoute}
-//                 onChange={(e) => setSelectedRoute(e.target.value)}
+//                 onChange={(e) => {
+//                   setTimingRecords([...timingRecords]);
+//                   setSelectedRoute(e.target.value);
+//                 }}
 //                 aria-label="Select a route to test"
 //               >
-//                 <option value="">-- Select a route to test --</option>
-//                 {routes?.map((route) => (
-//                   <option key={route} value={route} className="bg-[#1a1a1f] font-mono">
+//                 <option value="">Select a route to test</option>
+//                 {Array.isArray(routes) && routes.map((route) => (
+//                   <option
+//                     key={route}
+//                     value={route}
+//                     className="bg-[#1a1a1f] w-full flex items-center justify-between font-mono"
+//                   >
 //                     {route || "/"}
+//                     <span>
+//                       {Array.isArray(timingRecords) &&
+//                       timingRecords.filter((record) => record.intendedPath === route).length !== 0
+//                         ? "✔️"
+//                         : ""}
+//                     </span>
 //                   </option>
 //                 ))}
 //               </select>
@@ -150,7 +142,7 @@
 //           </div>
           
 //           {isTesting && selectedRoute && (
-//             <div className="mt-3 p-3 bg-[#2a2a35] border border-[#3a3a45] rounded">
+//             <div className="mt-3 p-3 w-full max-w-[95%] mx-auto mb-2 bg-[#2a2a35] border border-[#3a3a45] rounded">
 //               <div className="flex items-center gap-3">
 //                 <div className="w-4 h-4 border-2 border-[#64b5f6] border-t-transparent rounded-full animate-spin"></div>
 //                 <div className="flex-1">
@@ -163,73 +155,10 @@
 //               </div>
 //             </div>
 //           )}
-          
-//           {/* Show latest test result */}
-//           {selectedRoute && latestTestRecord && !isTesting && (
-//             <div className="mt-3 p-3 bg-[#0f0f12] border border-[#2a2a2a] rounded">
-//               <div className="flex items-center justify-between mb-2">
-//                 <span className="text-sm text-[#e0e0e0]">Latest test result:</span>
-//                 <span className="text-xs text-[#888]">
-//                   {new Date(latestTestRecord.timestamp).toLocaleTimeString()}
-//                 </span>
-//               </div>
-//               <div className="flex flex-wrap items-center gap-4">
-//                 <div className="flex flex-col">
-//                   <span className="text-xs text-[#a0a0a0]">Path</span>
-//                   <code className="text-sm text-[#e0e0e0] font-mono">
-//                     {latestTestRecord.path}
-//                   </code>
-//                 </div>
-//                 {latestTestRecord.intendedPath && (
-//                   <div className="flex flex-col">
-//                     <span className="text-xs text-[#a0a0a0]">Intended</span>
-//                     <code className="text-sm text-[#9c27b0] font-mono">
-//                       {latestTestRecord.intendedPath}
-//                     </code>
-//                   </div>
-//                 )}
-//                 <div className="flex flex-col">
-//                   <span className="text-xs text-[#a0a0a0]">Load Time</span>
-//                   <span className={`text-sm font-mono ${getLoadTimeClass(latestTestRecord.loadTime)}`}>
-//                     {latestTestRecord.loadTime} ms
-//                   </span>
-//                 </div>
-//                 <div className="flex flex-col">
-//                   <span className="text-xs text-[#a0a0a0]">Redirected</span>
-//                   <span className={`text-sm ${latestTestRecord.redirected ? 'text-[#9c27b0]' : 'text-[#4caf50]'}`}>
-//                     {latestTestRecord.redirected ? "Yes" : "No"}
-//                   </span>
-//                 </div>
-//               </div>
-//             </div>
-//           )}
 //         </div>
 
 //         {/* Timing Records Section */}
-//         <div className="bg-[#1a1a1f] border border-[#2a2a2a] rounded p-4">
-//           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-//             <div className="flex items-center gap-3">
-//               <div className="flex items-center gap-2">
-//                 <FaClock className="w-5 h-5 text-[#ff9800]" />
-//                 <h2 className="text-lg font-semibold text-[#e0e0e0]">
-//                   {selectedRoute ? `Latest Test Result` : `Route Timing Records`}
-//                 </h2>
-//               </div>
-//               <div className="px-2 py-1 bg-[#2a2a35] rounded text-sm text-[#a0a0a0]">
-//                 {sortedRecords.length} of {timingRecords.length} records
-//               </div>
-//             </div>
-            
-//             {selectedRoute && (
-//               <button 
-//                 className="px-3 py-1 text-sm bg-[#2a2a35] text-[#a0a0a0] border border-[#2a2a2a] rounded hover:bg-[#3a3a45] hover:border-[#3a3a45] transition-colors"
-//                 onClick={() => setSelectedRoute("")}
-//               >
-//                 Show All Routes
-//               </button>
-//             )}
-//           </div>
-
+//         <div className="bg-[#1a1a1f] rounded p-4">
 //           {timingRecords.length === 0 ? (
 //             <div className="flex flex-col items-center justify-center p-8 text-center border border-[#2a2a2a] rounded bg-[#0f0f12]">
 //               <FaInfoCircle className="w-8 h-8 text-[#888] mb-3" />
@@ -237,30 +166,6 @@
 //             </div>
 //           ) : (
 //             <div className="">
-//               {/* Performance Summary */}
-//               {!selectedRoute && (
-//                 <div className="flex gap-3 mb-4">
-//                   <div className="bg-[#0f0f12] border border-[#2a2a2a] rounded p-4">
-//                     <div className="text-2xl font-bold text-[#e0e0e0] text-center">
-//                       {averageLoadTime} ms
-//                     </div>
-//                     <div className="text-sm text-[#a0a0a0] text-center mt-1">Avg Load Time</div>
-//                   </div>
-//                   <div className="bg-[#0f0f12] border border-[#2a2a2a] rounded p-4">
-//                     <div className="text-2xl font-bold text-[#ff9800] text-center">
-//                       {timingRecords.filter(r => r.loadTime > 500).length}
-//                     </div>
-//                     <div className="text-sm text-[#a0a0a0] text-center mt-1">Slow Routes</div>
-//                   </div>
-//                   <div className="bg-[#0f0f12] border border-[#2a2a2a] rounded p-4">
-//                     <div className="text-2xl font-bold text-[#9c27b0] text-center">
-//                       {timingRecords.filter(r => r.redirected).length}
-//                     </div>
-//                     <div className="text-sm text-[#a0a0a0] text-center mt-1">Redirects</div>
-//                   </div>
-//                 </div>
-//               )}
-
 //               {/* Records List */}
 //               <div className="space-y-3">
 //                 {sortedRecords.map((record, index) => (
@@ -268,12 +173,12 @@
 //                     key={index} 
 //                     className={`border rounded p-4 transition-colors ${
 //                       record.redirected 
-//                         ? 'border-[#9c27b0] bg-[#9c27b0]/5' 
+//                         ? 'border-[#9c27b0] bg-[#2a2a35]' 
 //                         : record.loadTime > 500 
-//                           ? 'border-[#ff9800] bg-[#ff9800]/5' 
-//                           : 'border-[#2a2a2a] bg-[#0f0f12] hover:bg-[#1a1a1f]'
+//                           ? 'border-[#ff9800] hover:bg-[#3a3a45] hover:border-[#4a4a55]' 
+//                           : 'border-[#2a2a2a] bg-[#2a2a35] hover:bg-[#3a3a45] hover:border-[#4a4a55] hover:-translate-y-0.5 active:translate-y-0'
 //                     }`}
-//                   >
+//                   > 
 //                     <div className="flex gap-4 mb-3">
 //                       <div className="space-y-2">
 //                         <div className="flex flex-col">
@@ -334,17 +239,6 @@
 //                   </div>
 //                 ))}
 //               </div>
-              
-//               {!selectedRoute && showRecentOnly && timingRecords.length > 5 && (
-//                 <div className="text-center mt-4">
-//                   <button 
-//                     className="px-4 py-2 text-sm bg-[#2a2a35] text-[#a0a0a0] border border-[#2a2a2a] rounded hover:bg-[#3a3a45] hover:border-[#3a3a45] transition-colors"
-//                     onClick={() => setShowRecentOnly(false)}
-//                   >
-//                     Show all {timingRecords.length} records
-//                   </button>
-//                 </div>
-//               )}
 //             </div>
 //           )}
 //         </div>
@@ -353,30 +247,30 @@
 //   );
 // };
 
-// export default RouteHealthPanel;
-
+// export default SingleTest;
 
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   FaInfoCircle, 
-  FaPlay,
-  FaSpinner,
 } from "react-icons/fa";
-
+import { RouteSelector } from "../RoutesSelector";
 import type { RouteTiming } from "../../../utils/type";
 
 interface SingleTestProps {
   routes: string[] | unknown;
   timingRecords: RouteTiming[];
   setTimingRecords: React.Dispatch<React.SetStateAction<RouteTiming[]>>;
+  testingMode?: boolean;
+  toggleTestingMode?: () => void;
 }
 
 export const SingleTest: React.FC<SingleTestProps> = ({
   routes,
   timingRecords,
-  setTimingRecords
+  // testingMode,
+  // toggleTestingMode
 }) => {
   const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>('');
@@ -435,73 +329,17 @@ export const SingleTest: React.FC<SingleTestProps> = ({
   return (
     <div className="bg-[#1a1a1f] min-h-screen">
       <div className="space-y-4">
-        {/* Route Selector and Test Button */}
-        <div className="bg-[#1a1a1f] border-b border-[#2a2a2a]">
-          <div className="flex w-full py-3 max-w-[95%] mx-auto items-center gap-3">
-            <div className="flex-1">
-              <select
-                className="w-full bg-[#0f0f12] border border-[#2a2a2a] rounded px-3 py-2 text-sm text-[#e0e0e0] font-mono focus:outline-none focus:ring-1 focus:ring-[#64b5f6] focus:border-[#64b5f6]"
-                value={selectedRoute}
-                onChange={(e) => {
-                  setTimingRecords([...timingRecords]);
-                  setSelectedRoute(e.target.value);
-                }}
-                aria-label="Select a route to test"
-              >
-                <option value="">Select a route to test</option>
-                {Array.isArray(routes) && routes.map((route) => (
-                  <option
-                    key={route}
-                    value={route}
-                    className="bg-[#1a1a1f] w-full flex items-center justify-between font-mono"
-                  >
-                    {route || "/"}
-                    <span>
-                      {Array.isArray(timingRecords) &&
-                      timingRecords.filter((record) => record.intendedPath === route).length !== 0
-                        ? "✔️"
-                        : ""}
-                    </span>
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <button
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={handleTestRoute}
-              disabled={isTesting || !selectedRoute}
-              aria-label={`Test route ${selectedRoute}`}
-            >
-              {isTesting ? (
-                <>
-                  <FaSpinner className="w-4 h-4 animate-spin" />
-                  <span>Testing...</span>
-                </>
-              ) : (
-                <>
-                  <FaPlay className="w-3 h-3" />
-                  <span>Test Route</span>
-                </>
-              )}
-            </button>
-          </div>
-          
-          {isTesting && selectedRoute && (
-            <div className="mt-3 p-3 w-full max-w-[95%] mx-auto mb-2 bg-[#2a2a35] border border-[#3a3a45] rounded">
-              <div className="flex items-center gap-3">
-                <div className="w-4 h-4 border-2 border-[#64b5f6] border-t-transparent rounded-full animate-spin"></div>
-                <div className="flex-1">
-                  <span className="text-sm text-[#e0e0e0]">Testing route:</span>
-                  <code className="ml-2 text-sm text-[#64b5f6] bg-[#64b5f6]/10 px-2 py-1 rounded font-mono">
-                    {selectedRoute}
-                  </code>
-                  <div className="text-xs text-[#888] mt-1">Simulating navigation...</div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Route Selector Component */}
+        <RouteSelector
+          routes={Array.isArray(routes) ? routes : []}
+          selectedRoute={selectedRoute}
+          onRouteChange={(route) => {
+            setSelectedRoute(route);
+          }}
+          onTestRoute={handleTestRoute}
+          isTesting={isTesting}
+          timingRecords={timingRecords}
+        />
 
         {/* Timing Records Section */}
         <div className="bg-[#1a1a1f] rounded p-4">
@@ -514,7 +352,7 @@ export const SingleTest: React.FC<SingleTestProps> = ({
             <div className="">
               {/* Records List */}
               <div className="space-y-3">
-                {sortedRecords.map((record, index) => (
+                {!isTesting && sortedRecords.map((record, index) => (
                   <div 
                     key={index} 
                     className={`border rounded p-4 transition-colors ${
@@ -592,5 +430,3 @@ export const SingleTest: React.FC<SingleTestProps> = ({
     </div>
   );
 };
-
-export default SingleTest;

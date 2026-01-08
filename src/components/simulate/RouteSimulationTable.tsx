@@ -212,7 +212,7 @@ const TabButtons: React.FC<{
   authCount: number;
 }> = ({ activeTab, onTabChange, unauthCount, authCount }) => (
   <div className="w-full border-b border-[#2a2a2a] bg-[#1a1a1f]">
-     <div className="w-full flex items-center gap-1 mx-auto max-w-[95%] px-4">
+     <div className="w-full flex items-center gap-1">
       <button
       className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all ${
         activeTab === 'unauthenticated' 
@@ -297,7 +297,7 @@ const StatsGrid: React.FC<{
   unauthCount: number;
   authCount: number;
 }> = ({ totalRoutes, totalScenarios, unauthCount, authCount }) => (
-  <div className="grid grid-cols-4 gap-3 mb-4">
+  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
     {[
       { icon: FaRoute, value: totalRoutes, label: 'Total Routes', color: '#64b5f6', bg: 'bg-[#64b5f6]/10', border: 'border-[#64b5f6]/30' },
       { icon: FaChartBar, value: totalScenarios, label: 'Scenarios', color: '#9c27b0', bg: 'bg-[#9c27b0]/10', border: 'border-[#9c27b0]/30' },
@@ -306,13 +306,13 @@ const StatsGrid: React.FC<{
     ].map((stat) => (
       <div 
         key={stat.label} 
-        className={`border rounded-lg p-3 ${stat.bg} ${stat.border}`}
+        className={`border rounded-lg p-3 ${stat.bg} border border-[#2a2a2a]`}
       >
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded ${stat.bg.replace('/10', '/20')} border ${stat.border}`}>
+          <div className={`p-2 rounded ${stat.bg.replace('/10', '/20')} border border-[#2a2a2a] `}>
             <stat.icon className="w-4 h-4" style={{ color: stat.color }} />
           </div>
-          <div>
+          <div className="flex items-center gap-2">
             <div className="text-xl font-bold text-[#e0e0e0]">{stat.value}</div>
             <div className="text-xs text-[#a0a0a0] mt-0.5">{stat.label}</div>
           </div>

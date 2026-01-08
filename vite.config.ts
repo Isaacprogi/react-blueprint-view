@@ -1,4 +1,3 @@
-import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import dts from "vite-plugin-dts";
@@ -14,7 +13,6 @@ export default defineConfig({
       insertTypesEntry: true,
     }),
     libInjectCss(),
-    tailwindcss(),
   ],
   build: {
     lib: {

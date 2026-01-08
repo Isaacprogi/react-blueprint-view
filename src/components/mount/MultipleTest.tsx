@@ -1,422 +1,480 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { 
-  FaInfoCircle, 
-  FaPlay,
-  FaSpinner,
-  FaFilter,
-  FaSortAmountDown,
-  FaSortAmountUp,
-  FaExclamationTriangle,
-  FaCheckCircle
-} from "react-icons/fa";
+// import React, { useState, useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+// import { 
+//   FaInfoCircle, 
+//   FaPlay,
+//   FaSpinner,
+//   FaFilter,
+//   FaSortAmountDown,
+//   FaSortAmountUp,
+//   FaExclamationTriangle,
+//   FaCheckCircle
+// } from "react-icons/fa";
 
-import type { RouteTiming } from "../../../utils/type";
+// import type { RouteTiming } from "../../../utils/type";
+
+// interface MultipleTestProps {
+//   routes: string[];
+//   timingRecords: RouteTiming[];
+//   setTimingRecords: React.Dispatch<React.SetStateAction<RouteTiming[]>>;
+// }
+
+// type SortField = 'timestamp' | 'loadTime' | 'path' | 'intendedPath';
+// type SortDirection = 'asc' | 'desc';
+
+// export const MultipleTest: React.FC<MultipleTestProps> = ({
+//   routes,
+//   timingRecords,
+//   setTimingRecords
+// }) => {
+//   const navigate = useNavigate();
+//   const [isTestingAll, setIsTestingAll] = useState(false);
+//   const [currentRouteIndex, setCurrentRouteIndex] = useState<number | null>(null);
+//   const [sortField, setSortField] = useState<SortField>('timestamp');
+//   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+//   const [filter, setFilter] = useState<string>('all');
+
+//   // Group records by route
+//   const groupedByRoute: Record<string, RouteTiming[]> = {};
+//   timingRecords.forEach(record => {
+//     const route = record.intendedPath || record.path;
+//     if (!groupedByRoute[route]) groupedByRoute[route] = [];
+//     groupedByRoute[route].push(record);
+//   });
+
+//   // Get latest test for each route
+//   const latestTests = Object.keys(groupedByRoute).map(route => {
+//     const tests = groupedByRoute[route];
+//     return tests.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+//   });
+
+//   // Apply filter
+//   const filteredTests = latestTests.filter(test => {
+//     if (filter === 'all') return true;
+//     if (filter === 'success') return !test.redirected && test.loadTime <= 500;
+//     if (filter === 'redirected') return test.redirected;
+//     if (filter === 'slow') return test.loadTime > 500 && !test.redirected;
+//     return true;
+//   });
+
+  
+
+//   // Apply sorting
+//   const sortedTests = [...filteredTests].sort((a, b) => {
+//     let aValue: any = a[sortField];
+//     let bValue: any = b[sortField];
+
+//     if (sortField === 'timestamp') {
+//       aValue = new Date(a.timestamp).getTime();
+//       bValue = new Date(b.timestamp).getTime();
+//     }
+
+//     if (sortDirection === 'asc') return aValue > bValue ? 1 : -1;
+//     return aValue < bValue ? 1 : -1;
+//   });
+
+//   // -------------------
+//   // Sequential testing
+//   // -------------------
+//   const handleTestAllRoutes = () => {
+//     if (!routes || routes.length === 0) return;
+//     if (isTestingAll) return;
+
+//     setIsTestingAll(true);
+//     setCurrentRouteIndex(0);
+//     navigate(routes[0]);
+//   };
+
+//   useEffect(() => {
+//     if (!isTestingAll || currentRouteIndex === null) return;
+
+//     const currentRoute = routes[currentRouteIndex];
+
+//     const hasRecord = timingRecords.some(
+//       record => record.intendedPath === currentRoute
+//     );
+
+//     if (hasRecord) {
+//       const nextIndex = currentRouteIndex + 1;
+//       if (nextIndex < routes.length) {
+//         setCurrentRouteIndex(nextIndex);
+//         navigate(routes[nextIndex]);
+//       } else {
+//         // All done
+//         setIsTestingAll(false);
+//         setCurrentRouteIndex(null);
+//       }
+//     }
+//   }, [timingRecords, currentRouteIndex, routes, navigate, isTestingAll]);
+
+//   // Test single route manually
+//   const handleTestSingleRoute = (route: string) => {
+//     navigate(route);
+
+//     setTimingRecords(prev => {
+//       const newRecord: RouteTiming = {
+//         path: window.location.pathname,
+//         intendedPath: route,
+//         loadTime: Math.random() * 1000, // Simulated
+//         redirected: false,
+//         timestamp: new Date().toISOString(),
+//       };
+//       return [...prev, newRecord];
+//     });
+//   };
+
+//   // -------------------
+//   // Helper functions
+//   // -------------------
+//   const getLoadTimeClass = (time: number) => {
+//     if (time < 100) return "text-[#4caf50]";
+//     if (time < 500) return "text-[#ff9800]";
+//     return "text-[#ef5350]";
+//   };
+
+//   const getLoadTimeBgClass = (time: number) => {
+//     if (time < 100) return "bg-[#4caf50]/10";
+//     if (time < 500) return "bg-[#ff9800]/10";
+//     return "bg-[#ef5350]/10";
+//   };
+
+//   const getTestStatus = (test: RouteTiming) => {
+//     if (test.redirected) return { label: 'Redirected', color: 'bg-[#9c27b0]/20', text: 'text-[#9c27b0]', icon: FaExclamationTriangle };
+//     if (test.loadTime > 500) return { label: 'Slow', color: 'bg-[#ff9800]/20', text: 'text-[#ff9800]', icon: FaExclamationTriangle };
+//     return { label: 'Success', color: 'bg-[#4caf50]/20', text: 'text-[#4caf50]', icon: FaCheckCircle };
+//   };
+
+//   const handleSort = (field: SortField) => {
+//     if (sortField === field) setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+//     else {
+//       setSortField(field);
+//       setSortDirection('desc');
+//     }
+//   };
+
+//   // -------------------
+//   // Statistics
+//   // -------------------
+//   const totalRoutes = routes.length;
+//   const testedRoutes = latestTests.length;
+//   const successTests = latestTests.filter(t => !t.redirected && t.loadTime <= 500).length;
+//   const redirectedTests = latestTests.filter(t => t.redirected).length;
+//   const slowTests = latestTests.filter(t => t.loadTime > 500 && !t.redirected).length;
+//   const averageLoadTime = latestTests.length > 0 
+//     ? Math.round(latestTests.reduce((acc, t) => acc + t.loadTime, 0) / latestTests.length)
+//     : 0;
+
+//   // -------------------
+//   // Render
+//   // -------------------
+//   return (
+//     <div className="bg-[#1a1a1f] min-h-screen">
+//       <div className="space-y-4">
+//         {/* Header with Test All */}
+//         <div className="bg-[#1a1a1f] border-b border-[#2a2a2a]">
+//           <div className="flex justify-between items-center py-3 max-w-[95%] mx-auto">
+//             <h3 className="text-lg font-semibold text-[#e0e0e0]">Multiple Route Tests</h3>
+//             <button
+//               onClick={handleTestAllRoutes}
+//               disabled={isTestingAll || !routes.length}
+//               className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+//             >
+//               {isTestingAll ? <><FaSpinner className="w-4 h-4 animate-spin" /> Testing...</> 
+//                             : <><FaPlay className="w-3 h-3" /> Test All Routes</>}
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Test Results */}
+//         <div className="bg-[#1a1a1f] rounded p-4">
+//           {sortedTests.length === 0 ? (
+//             <div className="flex flex-col items-center justify-center p-8 text-center border border-[#2a2a2a] rounded bg-[#0f0f12]">
+//               <FaInfoCircle className="w-8 h-8 text-[#888] mb-3" />
+//               <p className="text-sm text-[#888]">
+//                 {timingRecords.length === 0 
+//                   ? "No test results yet. Run tests to see results."
+//                   : "No tests match the current filter."
+//                 }
+//               </p>
+//             </div>
+//           ) : (
+//             <div className="space-y-3">
+//               {sortedTests.map((test, index) => {
+//                 const status = getTestStatus(test);
+//                 const StatusIcon = status.icon;
+
+//                 return (
+//                   <div key={index} className="border rounded p-4 transition-all hover:-translate-y-0.5 active:translate-y-0">
+//                     <div className="flex justify-between mb-3">
+//                       <div>
+//                         <code className="text-sm text-[#e0e0e0] font-mono truncate">{test.intendedPath || test.path}</code>
+//                         {test.path !== test.intendedPath && (
+//                           <div className="text-xs text-[#9c27b0] font-mono truncate">Actual: {test.path}</div>
+//                         )}
+//                       </div>
+//                       <div className="flex items-center gap-4">
+//                         <div className={`inline-flex items-center px-2 py-1 rounded text-sm font-mono ${getLoadTimeBgClass(test.loadTime)} ${getLoadTimeClass(test.loadTime)}`}>
+//                           {test.loadTime} ms
+//                         </div>
+//                         <div className={`px-3 py-1 rounded-full flex items-center gap-1 ${status.color} ${status.text}`}>
+//                           <StatusIcon className="w-3 h-3" />
+//                           <span className="text-xs font-medium">{status.label}</span>
+//                         </div>
+//                         <button
+//                           className="px-3 py-1 text-xs bg-[#2a2a35] border border-[#2a2a2a] text-[#a0a0a0] rounded hover:bg-[#3a3a45] hover:border-[#3a3a45] transition-colors"
+//                           // onClick={() => handleTestSingleRoute(test.intendedPath || test.path)}
+//                           onClick={()=>setTimingRecords([])}
+//                         >
+//                           Test Again
+//                         </button>
+//                       </div>
+//                     </div>
+//                     <div className="text-xs text-[#888] border-t border-[#2a2a2a] pt-2 flex justify-between">
+//                       <span>Tested: {new Date(test.timestamp).toLocaleString()}</span>
+//                       <span>Load: {test.loadTime} ms</span>
+//                     </div>
+//                   </div>
+//                 );
+//               })}
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default MultipleTest;
+
+
+import { useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
 
 interface MultipleTestProps {
-  routes: string[] | unknown;
+  routes: string[];
   timingRecords: RouteTiming[];
   setTimingRecords: React.Dispatch<React.SetStateAction<RouteTiming[]>>;
 }
 
-type SortField = 'timestamp' | 'loadTime' | 'path' | 'intendedPath';
-type SortDirection = 'asc' | 'desc';
+export interface RouteTiming {
+  path: string;
+  intendedPath?: string;
+  loadTime: number;
+  redirected?: boolean;
+  timestamp: string;
+  metadata?: Record<string, any>;
+}
 
 export const MultipleTest: React.FC<MultipleTestProps> = ({
   routes,
   timingRecords,
-  setTimingRecords
 }) => {
+  const [currentRouteIndex, setCurrentRouteIndex] = React.useState(0);
   const navigate = useNavigate();
-  const [isTestingAll, setIsTestingAll] = useState<boolean>(false);
-  const [sortField, setSortField] = useState<SortField>('timestamp');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [filter, setFilter] = useState<string>('all'); // 'all', 'success', 'redirected', 'slow'
+  const currentRoute = routes[currentRouteIndex];
 
-  // Group records by route
-  const groupedByRoute: Record<string, RouteTiming[]> = {};
-  
-  timingRecords.forEach(record => {
-    const route = record.intendedPath || record.path;
-    if (!groupedByRoute[route]) {
-      groupedByRoute[route] = [];
+  useEffect(() => {
+    handleTestAllRoutes();
+  }, [currentRoute]);
+
+  useEffect(() => {
+    if (timingRecords[currentRouteIndex]) {
+      setTimeout(() => {
+        setCurrentRouteIndex(prev => prev + 1);
+      }, 4000);
     }
-    groupedByRoute[route].push(record);
-  });
-
-  // Get latest test for each route
-  const latestTests = Object.keys(groupedByRoute).map(route => {
-    const tests = groupedByRoute[route];
-    return tests.sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    )[0];
-  });
-
-  // Apply filter
-  const filteredTests = latestTests.filter(test => {
-    if (filter === 'all') return true;
-    if (filter === 'success') return !test.redirected && test.loadTime <= 500;
-    if (filter === 'redirected') return test.redirected;
-    if (filter === 'slow') return test.loadTime > 500 && !test.redirected;
-    return true;
-  });
-
-  // Apply sorting
-  const sortedTests = [...filteredTests].sort((a, b) => {
-    let aValue: any = a[sortField];
-    let bValue: any = b[sortField];
-    
-    if (sortField === 'timestamp') {
-      aValue = new Date(a.timestamp).getTime();
-      bValue = new Date(b.timestamp).getTime();
-    }
-    
-    if (sortDirection === 'asc') {
-      return aValue > bValue ? 1 : -1;
-    } else {
-      return aValue < bValue ? 1 : -1;
-    }
-  });
+  }, [timingRecords]);
 
   const handleTestAllRoutes = () => {
-    if (!Array.isArray(routes) || routes.length === 0) return;
-    
-    setIsTestingAll(true);
-    
-    // Test each route sequentially with a delay
-    routes.forEach((route, index) => {
-      setTimeout(() => {
-        navigate(route);
-        // Update timing records after navigation
-        setTimeout(() => {
-          setTimingRecords(prev => {
-            if (!prev) return prev;
-            const newRecord: RouteTiming = {
-              path: window.location.pathname,
-              intendedPath: route,
-              loadTime: Math.random() * 1000, // Simulated load time
-              redirected: false, // This should come from actual navigation
-              timestamp: new Date().toISOString(),
-            };
-            return [...prev, newRecord];
-          });
-        }, 100);
-      }, index * 2000); // 2 second delay between tests
-    });
-    
-    // Reset testing state after all tests
-    setTimeout(() => setIsTestingAll(false), routes.length * 2000 + 1000);
+    navigate(currentRoute);
   };
-
-  const handleTestSingleRoute = (route: string) => {
-    navigate(route);
-    
-    // Add a test record
-    setTimeout(() => {
-      setTimingRecords(prev => {
-        if (!prev) return prev;
-        const newRecord: RouteTiming = {
-          path: window.location.pathname,
-          intendedPath: route,
-          loadTime: Math.random() * 1000, // Simulated load time
-          redirected: false, // This should come from actual navigation
-          timestamp: new Date().toISOString(),
-        };
-        return [...prev, newRecord];
-      });
-    }, 100);
-  };
-
-  const getLoadTimeClass = (time: number) => {
-    if (time < 100) return "text-[#4caf50]";
-    if (time < 500) return "text-[#ff9800]";
-    return "text-[#ef5350]";
-  };
-
-  const getLoadTimeBgClass = (time: number) => {
-    if (time < 100) return "bg-[#4caf50]/10";
-    if (time < 500) return "bg-[#ff9800]/10";
-    return "bg-[#ef5350]/10";
-  };
-
-  const getTestStatus = (test: RouteTiming) => {
-    if (test.redirected) return { label: 'Redirected', color: 'bg-[#9c27b0]/20', text: 'text-[#9c27b0]', icon: FaExclamationTriangle };
-    if (test.loadTime > 500) return { label: 'Slow', color: 'bg-[#ff9800]/20', text: 'text-[#ff9800]', icon: FaExclamationTriangle };
-    return { label: 'Success', color: 'bg-[#4caf50]/20', text: 'text-[#4caf50]', icon: FaCheckCircle };
-  };
-
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('desc');
-    }
-  };
-
-  // Calculate statistics
-  const totalRoutes = Array.isArray(routes) ? routes.length : 0;
-  const testedRoutes = latestTests.length;
-  const successTests = latestTests.filter(t => !t.redirected && t.loadTime <= 500).length;
-  const redirectedTests = latestTests.filter(t => t.redirected).length;
-  const slowTests = latestTests.filter(t => t.loadTime > 500 && !t.redirected).length;
-  const averageLoadTime = latestTests.length > 0 
-    ? Math.round(latestTests.reduce((acc, t) => acc + t.loadTime, 0) / latestTests.length)
-    : 0;
+  console.log(timingRecords)
+  // const currentRecord = timingRecords[currentRouteIndex];
+  const progressPercentage = routes.length > 0 ? ((currentRouteIndex + 1) / routes.length) * 100 : 0;
 
   return (
-    <div className="bg-[#1a1a1f] min-h-screen">
-      <div className="space-y-4">
-        {/* Header with Test All Button and Statistics */}
-        <div className="bg-[#1a1a1f] border-b border-[#2a2a2a]">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full py-3 max-w-[95%] mx-auto">
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-[#e0e0e0]">Multiple Route Tests</h3>
-              <p className="text-sm text-[#888]">View and test all routes at once</p>
-            </div>
-            
-            <button
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={handleTestAllRoutes}
-              disabled={isTestingAll || !Array.isArray(routes) || routes.length === 0}
-              aria-label="Test all routes"
-            >
-              {isTestingAll ? (
-                <>
-                  <FaSpinner className="w-4 h-4 animate-spin" />
-                  <span>Testing All Routes...</span>
-                </>
-              ) : (
-                <>
-                  <FaPlay className="w-3 h-3" />
-                  <span>Test All Routes</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Statistics */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 w-full max-w-[95%] mx-auto pb-4">
-            <div className="bg-[#0f0f12] border border-[#2a2a2a] rounded p-3">
-              <div className="text-2xl font-bold text-[#e0e0e0] text-center">
-                {totalRoutes}
-              </div>
-              <div className="text-xs text-[#a0a0a0] text-center mt-1">Total Routes</div>
-            </div>
-            <div className="bg-[#0f0f12] border border-[#2a2a2a] rounded p-3">
-              <div className="text-2xl font-bold text-[#4caf50] text-center">
-                {testedRoutes}
-              </div>
-              <div className="text-xs text-[#a0a0a0] text-center mt-1">Tested</div>
-            </div>
-            <div className="bg-[#0f0f12] border border-[#2a2a2a] rounded p-3">
-              <div className="text-2xl font-bold text-[#4caf50] text-center">
-                {successTests}
-              </div>
-              <div className="text-xs text-[#a0a0a0] text-center mt-1">Success</div>
-            </div>
-            <div className="bg-[#0f0f12] border border-[#2a2a2a] rounded p-3">
-              <div className="text-2xl font-bold text-[#ff9800] text-center">
-                {slowTests}
-              </div>
-              <div className="text-xs text-[#a0a0a0] text-center mt-1">Slow</div>
-            </div>
-            <div className="bg-[#0f0f12] border border-[#2a2a2a] rounded p-3">
-              <div className="text-2xl font-bold text-[#9c27b0] text-center">
-                {redirectedTests}
-              </div>
-              <div className="text-xs text-[#a0a0a0] text-center mt-1">Redirected</div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Route Performance Testing</h1>
+          <p className="text-gray-400">Automatically testing routes for performance metrics</p>
         </div>
 
-        {/* Controls */}
-        <div className="bg-[#1a1a1f] border-b border-[#2a2a2a]">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full py-3 max-w-[95%] mx-auto">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-sm text-[#a0a0a0]">
-                <FaFilter className="w-4 h-4" />
-                <span>Filter:</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Progress & Controls */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Progress Card */}
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-white">Testing Progress</h2>
+                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">
+                  {currentRouteIndex + 1} / {routes.length}
+                </span>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {['all', 'success', 'slow', 'redirected'].map((filterType) => (
-                  <button
-                    key={filterType}
-                    className={`px-3 py-1 text-xs rounded-full transition-colors ${
-                      filter === filterType
-                        ? filterType === 'success'
-                          ? 'bg-[#4caf50]/20 text-[#4caf50] border border-[#4caf50]/40'
-                          : filterType === 'slow'
-                          ? 'bg-[#ff9800]/20 text-[#ff9800] border border-[#ff9800]/40'
-                          : filterType === 'redirected'
-                          ? 'bg-[#9c27b0]/20 text-[#9c27b0] border border-[#9c27b0]/40'
-                          : 'bg-[#64b5f6]/20 text-[#64b5f6] border border-[#64b5f6]/40'
-                        : 'bg-[#2a2a35] text-[#888] border border-[#2a2a2a] hover:border-[#3a3a45]'
-                    }`}
-                    onClick={() => setFilter(filterType)}
-                  >
-                    {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-sm text-[#a0a0a0]">
-                <FaSortAmountDown className="w-4 h-4" />
-                <span>Sort:</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { field: 'timestamp', label: 'Time' },
-                  { field: 'loadTime', label: 'Load Time' },
-                  { field: 'intendedPath', label: 'Route' }
-                ].map((sortOption) => (
-                  <button
-                    key={sortOption.field}
-                    className={`px-3 py-1 text-xs rounded-full flex items-center gap-1 transition-colors ${
-                      sortField === sortOption.field
-                        ? 'bg-[#64b5f6]/20 text-[#64b5f6] border border-[#64b5f6]/40'
-                        : 'bg-[#2a2a35] text-[#888] border border-[#2a2a2a] hover:border-[#3a3a45]'
-                    }`}
-                    onClick={() => handleSort(sortOption.field as SortField)}
-                  >
-                    {sortOption.label}
-                    {sortField === sortOption.field && (
-                      sortDirection === 'asc' ? <FaSortAmountUp className="w-3 h-3" /> : <FaSortAmountDown className="w-3 h-3" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Test Results */}
-        <div className="bg-[#1a1a1f] rounded p-4">
-          {sortedTests.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center border border-[#2a2a2a] rounded bg-[#0f0f12]">
-              <FaInfoCircle className="w-8 h-8 text-[#888] mb-3" />
-              <p className="text-sm text-[#888]">
-                {timingRecords.length === 0 
-                  ? "No test results yet. Run tests to see results."
-                  : "No tests match the current filter."
-                }
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {sortedTests.map((test, index) => {
-                const status = getTestStatus(test);
-                const StatusIcon = status.icon;
-                
-                return (
+              {/* Progress Bar */}
+              <div className="mb-6">
+                <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
                   <div 
-                    key={index} 
-                    className={`border rounded p-4 transition-all hover:-translate-y-0.5 active:translate-y-0 ${
-                      test.redirected 
-                        ? 'border-[#9c27b0] bg-[#2a2a35] hover:bg-[#3a3a45] hover:border-[#9c27b0]/60' 
-                        : test.loadTime > 500 
-                          ? 'border-[#ff9800] bg-[#2a2a35] hover:bg-[#3a3a45] hover:border-[#ff9800]/60' 
-                          : 'border-[#2a2a2a] bg-[#2a2a35] hover:bg-[#3a3a45] hover:border-[#4a4a55]'
-                    }`}
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
-                      <div className="flex-1 space-y-2">
-                        <div className="flex flex-col">
-                          <span className="text-xs text-[#a0a0a0]">Route</span>
-                          <code className="text-sm text-[#e0e0e0] font-mono truncate">
-                            {test.intendedPath || test.path}
-                          </code>
-                        </div>
-                        
-                        {test.path !== test.intendedPath && (
-                          <div className="flex flex-col">
-                            <span className="text-xs text-[#a0a0a0]">Actual Path</span>
-                            <code className="text-sm text-[#9c27b0] font-mono truncate">
-                              {test.path}
-                            </code>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center gap-4">
-                        <div className="flex flex-col items-end">
-                          <span className="text-xs text-[#a0a0a0]">Load Time</span>
-                          <div className={`inline-flex items-center px-2 py-1 rounded text-sm font-mono ${getLoadTimeBgClass(test.loadTime)} ${getLoadTimeClass(test.loadTime)}`}>
-                            {test.loadTime} ms
-                          </div>
-                        </div>
-                        
-                        <div className={`px-3 py-1 rounded-full flex items-center gap-1 ${status.color} ${status.text}`}>
-                          <StatusIcon className="w-3 h-3" />
-                          <span className="text-xs font-medium">{status.label}</span>
-                        </div>
-                        
-                        <button
-                          className="px-3 py-1 text-xs bg-[#2a2a35] border border-[#2a2a2a] text-[#a0a0a0] rounded hover:bg-[#3a3a45] hover:border-[#3a3a45] transition-colors"
-                          onClick={() => handleTestSingleRoute(test.intendedPath || test.path)}
-                          disabled={isTestingAll}
-                        >
-                          Test Again
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col md:flex-row md:items-center justify-between pt-3 border-t border-[#2a2a2a] text-xs text-[#888]">
-                      <div>
-                        Tested: {new Date(test.timestamp).toLocaleString()}
-                      </div>
-                      <div className="flex items-center gap-4 mt-1 md:mt-0">
-                        {test.metadata?.guard && (
-                          <span className="text-[#64b5f6]">Guard: {test.metadata.guard}</span>
-                        )}
-                        {test.metadata?.reason && (
-                          <span className="text-[#ff9800]">Reason: {test.metadata.reason}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+                <div className="flex justify-between mt-2">
+                  <span className="text-sm text-gray-400">Started</span>
+                  <span className="text-sm text-gray-400">Complete</span>
+                </div>
+              </div>
 
-          {/* Routes that haven't been tested */}
-          {Array.isArray(routes) && (
-            <div className="mt-8">
-              <h4 className="text-sm font-semibold text-[#a0a0a0] mb-3">Untested Routes</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {routes
-                  .filter(route => !latestTests.some(test => 
-                    (test.intendedPath || test.path) === route
-                  ))
-                  .map((route, index) => (
-                    <div 
-                      key={index}
-                      className="border border-[#2a2a2a] bg-[#0f0f12] rounded p-3 hover:bg-[#1a1a1f] hover:border-[#3a3a45] transition-colors"
-                    >
-                      <div className="flex items-center justify-between">
-                        <code className="text-sm text-[#e0e0e0] font-mono truncate">
-                          {route || "/"}
-                        </code>
-                        <button
-                          className="px-2 py-1 text-xs bg-[#2a2a35] border border-[#2a2a2a] text-[#a0a0a0] rounded hover:bg-[#3a3a45] hover:border-[#3a3a45] transition-colors"
-                          onClick={() => handleTestSingleRoute(route)}
-                          disabled={isTestingAll}
-                        >
-                          Test
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+              {/* Current Route Card */}
+              <div className="bg-gray-900/50 rounded-lg border border-gray-700 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+                    <span className="text-sm font-medium text-gray-300">Currently Testing</span>
+                  </div>
+                  <span className="text-xs text-gray-400">Auto-advance in 4s</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <code className="text-lg font-mono text-white bg-gray-800 px-3 py-2 rounded-lg flex-1 mr-4 overflow-x-auto whitespace-nowrap">
+                    {currentRoute}
+                  </code>
+                  <button
+                    onClick={handleTestAllRoutes}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg font-medium hover:opacity-90 transition-opacity active:scale-95 whitespace-nowrap"
+                  >
+                    Test Now
+                  </button>
+                </div>
               </div>
             </div>
-          )}
+
+          
+          </div>
+
+          {/* Right Column - Route List */}
+          <div className="space-y-6">
+            {/* Route List Card */}
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-700">
+                <h3 className="text-xl font-semibold text-white">Route Queue</h3>
+                <p className="text-sm text-gray-400 mt-1">Routes to be tested in order</p>
+              </div>
+              <div className="divide-y divide-gray-700 max-h-[500px] overflow-y-auto">
+                {routes.map((route, index) => {
+                  const isCurrent = index === currentRouteIndex;
+                  const isTested = index < currentRouteIndex;
+
+                  return (
+                    <div
+                      key={index}
+                      className={`px-6 py-4 transition-all ${
+                        isCurrent 
+                          ? 'bg-blue-500/10 border-l-4 border-blue-500' 
+                          : isTested
+                          ? 'bg-gray-900/30'
+                          : ''
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {/* Status Indicator */}
+                        <div className="flex-shrink-0">
+                          {isCurrent ? (
+                            <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+                          ) : isTested ? (
+                            <div className="w-3 h-3 bg-green-500 rounded-full" />
+                          ) : (
+                            <div className="w-3 h-3 bg-gray-600 rounded-full" />
+                          )}
+                        </div>
+
+                        {/* Route Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={`font-medium ${
+                              isCurrent ? 'text-blue-400' : isTested ? 'text-gray-300' : 'text-gray-400'
+                            }`}>
+                              Route #{index + 1}
+                            </span>
+                            {isCurrent && (
+                              <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs font-medium">
+                                Testing
+                              </span>
+                            )}
+                            {isTested && (
+                              <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-medium">
+                                Complete
+                              </span>
+                            )}
+                          </div>
+                          <code className={`text-sm font-mono block truncate ${
+                            isCurrent ? 'text-white' : isTested ? 'text-gray-400' : 'text-gray-500'
+                          }`}>
+                            {route}
+                          </code>
+                          
+                          {/* Timing Display for tested routes */}
+                          {isTested && timingRecords[index] && (
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-xs text-gray-500">
+                                {timingRecords[index].loadTime}ms
+                              </span>
+                              <span className="text-xs text-gray-500">•</span>
+                              <span className={`text-xs ${
+                                timingRecords[index].redirected ? 'text-yellow-500' : 'text-green-500'
+                              }`}>
+                                {timingRecords[index].redirected ? 'Redirected' : 'Direct'}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Summary Footer */}
+              <div className="px-6 py-4 border-t border-gray-700 bg-gray-900/30">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400">Total Routes</p>
+                    <p className="text-xl font-bold text-white">{routes.length}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-400">Completed</p>
+                    <p className="text-xl font-bold text-green-400">{currentRouteIndex}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-400">Remaining</p>
+                    <p className="text-xl font-bold text-blue-400">{routes.length - currentRouteIndex}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats Card */}
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
+              <h3 className="text-xl font-semibold text-white mb-4">Testing Statistics</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Current Route Index</span>
+                  <span className="text-2xl font-bold text-white">{currentRouteIndex}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Auto-advance Delay</span>
+                  <span className="text-xl font-semibold text-cyan-400">4 seconds</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Progress</span>
+                  <span className="text-xl font-semibold text-blue-400">{progressPercentage.toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
-
-export default MultipleTest;

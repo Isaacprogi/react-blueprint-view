@@ -17,24 +17,49 @@ export const RouteTree: React.FC<TreeProps> = ({
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
+  const TOP_OFFSET = 700; // space for RK + App boxes
+  const initialTransformRef = useRef<d3.ZoomTransform | null>(null);
+
+
 
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-  const [transform, setTransform] = useState<d3.ZoomTransform>(d3.zoomIdentity);
+  const [transform, setTransform] = useState<d3.ZoomTransform>(() => {
+  const saved = localStorage.getItem("route-tree-transform");
+  if (!saved) return d3.zoomIdentity;
+
+  const { x, y, k } = JSON.parse(saved);
+  return d3.zoomIdentity.translate(x, y).scale(k);
+});
+
+
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
 
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(() => {
-    const allNodeIds = new Set<string>();
-    const collectIds = (nodes: VisualRouteNode[]) => {
-      nodes.forEach((node) => {
-        allNodeIds.add(node.id);
-        if (node.children.length > 0) {
-          collectIds(node.children);
-        }
-      });
-    };
-    collectIds(routes);
-    return allNodeIds;
-  });
+  const saved = localStorage.getItem("route-tree-expanded-nodes");
+  if (saved) {
+    return new Set<string>(JSON.parse(saved));
+  }
+
+  // fallback: expand all
+  const allNodeIds = new Set<string>();
+  const collectIds = (nodes: VisualRouteNode[]) => {
+    nodes.forEach((node) => {
+      allNodeIds.add(node.id);
+      collectIds(node.children);
+    });
+  };
+  collectIds(routes);
+  return allNodeIds;
+});
+
+
+  useEffect(() => {
+  localStorage.setItem(
+    "route-tree-expanded-nodes",
+    JSON.stringify(Array.from(expandedNodes))
+  );
+}, [expandedNodes]);
+
 
   // Update dimensions on resize
   useEffect(() => {
@@ -122,15 +147,26 @@ export const RouteTree: React.FC<TreeProps> = ({
       .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
       .on("zoom", (event) => {
-        g.attr("transform", event.transform);
-        setTransform(event.transform);
-      });
+  g.attr("transform", event.transform);
+  setTransform(event.transform);
+
+  localStorage.setItem(
+    "route-tree-transform",
+    JSON.stringify({
+      x: event.transform.x,
+      y: event.transform.y,
+      k: event.transform.k,
+    })
+  );
+});
 
     zoomRef.current = zoom;
-    svg.call(zoom);
+svg.call(zoom);
 
-    // Main group (will hold transform)
-    const g = svg.append("g").attr("transform", transform.toString());
+const g = svg.append("g");
+
+// 🔑 Sync BOTH visual + zoom state
+svg.call(zoom.transform, transform);
 
     // Grid background
     const defs = svg.append("defs");
@@ -495,19 +531,40 @@ export const RouteTree: React.FC<TreeProps> = ({
 
     // Auto-center on first render
     const bounds = g.node()?.getBBox();
-    if (bounds && transform.k === 1 && transform.x === 0 && transform.y === 0) {
-      const scale = Math.min(
-        1,
-        (width - 200) / bounds.width,
-        (height - 200) / bounds.height
-      );
-      const x = (width - bounds.width * scale) / 2 - bounds.x * scale;
-      const y = (height - bounds.height * scale) / 2 - (bounds.y + 400) * scale;
 
-      svg.call(zoom.transform, d3.zoomIdentity.translate(x, y).scale(scale));
-      setTransform(d3.zoomIdentity.translate(x, y).scale(scale));
-    }
-  }, [routes, selectedNodeId, dimensions, expandedNodes, onSelect, transform]);
+if (
+  bounds &&
+  transform.k === 1 &&
+  transform.x === 0 &&
+  transform.y === 0 &&
+  !initialTransformRef.current
+) {
+  const scale = Math.min(
+    1,
+    (width - 200) / bounds.width,
+    (height - 200) / bounds.height
+  );
+
+  const x =
+    (width - bounds.width * scale) / 2 -
+    bounds.x * scale;
+
+  const y =
+    (height - bounds.height * scale) / 2 -
+    (bounds.y + TOP_OFFSET) * scale;
+
+  const initialTransform = d3.zoomIdentity
+    .translate(x, y)
+    .scale(scale);
+
+  // ✅ Save it ONCE
+  initialTransformRef.current = initialTransform;
+
+  svg.call(zoom.transform, initialTransform);
+  setTransform(initialTransform);
+}
+
+  }, [routes, selectedNodeId, dimensions, expandedNodes, onSelect]);
 
   // Zoom controls
   const handleZoomIn = () => {
@@ -529,39 +586,21 @@ export const RouteTree: React.FC<TreeProps> = ({
   };
 
   const handleResetView = () => {
-    if (!svgRef.current || !zoomRef.current) return;
+  if (!svgRef.current || !zoomRef.current || !initialTransformRef.current) return;
+  localStorage.removeItem("route-tree-transform");
+  const svg = d3.select(svgRef.current);
 
-    const svg = d3.select(svgRef.current);
-    const g = svg.select<SVGGElement>("g");
-    const gNode = g.node();
+  svg
+    .transition()
+    .duration(600)
+    .call(
+      zoomRef.current.transform,
+      initialTransformRef.current
+    );
 
-    if (!gNode) return;
+  setTransform(initialTransformRef.current);
+};
 
-    const bounds = gNode.getBBox();
-
-    let newTransform = d3.zoomIdentity;
-    if (bounds) {
-      const scale = Math.min(
-        1,
-        (dimensions.width - 200) / bounds.width,
-        (dimensions.height - 200) / bounds.height
-      );
-      const x =
-        (dimensions.width - bounds.width * scale) / 2 - bounds.x * scale;
-      const y =
-        100 +
-        (dimensions.height - bounds.height * scale) / 2 -
-        bounds.y * scale;
-      newTransform = d3.zoomIdentity.translate(x, y).scale(scale);
-    }
-
-    svg
-      .transition()
-      .duration(600)
-      .call(zoomRef.current.transform, newTransform);
-
-    setTransform(newTransform);
-  };
 
   const handleExpandAll = () => {
     const allIds = new Set<string>();
@@ -598,7 +637,7 @@ export const RouteTree: React.FC<TreeProps> = ({
     <div className="h-full flex flex-col bg-[#0f0f12] overflow-hidden">
       {/* Controls section */}
       <div className="border-b py-3 bg-[#1a1a1f] border-[#2a2a2a]">
-        <div className="px-5 w-full max-w-[95%] mx-auto flex justify-between items-center shrink-0">
+        <div className="w-full max-w-[95%] mx-auto flex justify-between items-center shrink-0">
           <div className="flex gap-3 items-center">
             <button
               onClick={handleToggleExpandCollapse}
@@ -612,10 +651,8 @@ export const RouteTree: React.FC<TreeProps> = ({
             >
               Reset View
             </button>
-          </div>
 
-          {/* Zoom Controls */}
-          <div className="flex items-center gap-2 bg-[#2a2a35] rounded-lg px-2 py-1 border border-[#3a3a45]">
+             <div className=" hidden md:flex items-center gap-2 bg-[#2a2a35] rounded-lg px-2 py-1 border border-[#3a3a45]">
             <button
               onClick={handleZoomOut}
               className="w-8 h-8 flex items-center justify-center bg-[#3a3a45] text-white rounded-md cursor-pointer text-lg font-bold transition-all duration-200 hover:bg-[#4a4a55] hover:scale-110 active:scale-95"
@@ -635,9 +672,9 @@ export const RouteTree: React.FC<TreeProps> = ({
             </button>
           </div>
 
-          {/* Statistics */}
-          <div className="flex items-center gap-4">
-            <div className="flex gap-2">
+
+          <div className="md:flex items-center hidden  bg-[#1a1a1f] justify-between gap-4">
+            
               <span className="flex items-center gap-1.5 text-sm text-[#888] px-3 py-2 bg-[#2a2a35] rounded-lg border border-[#3a3a45]">
                 <span className="text-base">🌳</span>
                 {routes.length} root{routes.length !== 1 ? "s" : ""}
@@ -646,9 +683,48 @@ export const RouteTree: React.FC<TreeProps> = ({
                 <span className="text-base">📊</span>
                 {totalNodeCount} nodes
               </span>
-            </div>
+            
+          </div>
+
+          </div>
+
+          
+        <div className="flex items-center md:hidden gap-2 bg-[#2a2a35] rounded-lg px-2 py-1 border border-[#3a3a45]">
+            <button
+              onClick={handleZoomOut}
+              className="w-8 h-8 flex items-center justify-center bg-[#3a3a45] text-white rounded-md cursor-pointer text-lg font-bold transition-all duration-200 hover:bg-[#4a4a55] hover:scale-110 active:scale-95"
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+            <span className="text-sm text-[#a0a0a0] font-medium min-w-[45px] text-center">
+              {Math.round(transform.k * 100)}%
+            </span>
+            <button
+              onClick={handleZoomIn}
+              className="w-8 h-8 flex items-center justify-center bg-[#3a3a45] text-white rounded-md cursor-pointer text-lg font-bold transition-all duration-200 hover:bg-[#4a4a55] hover:scale-110 active:scale-95"
+              aria-label="Zoom in"
+            >
+              +
+            </button>
           </div>
         </div>
+
+      </div>
+
+      <div className="bg-[#1a1a1f] block md:hidden ">
+        <div className="flex items-center   justify-between  w-full max-w-[95%] mx-auto  gap-4">
+            
+              <span className="flex items-center gap-1.5 text-sm text-[#888] px-3 py-2 bg-[#2a2a35] rounded-lg border border-[#3a3a45]">
+                <span className="text-base">🌳</span>
+                {routes.length} root{routes.length !== 1 ? "s" : ""}
+              </span>
+              <span className="flex items-center gap-1.5 text-sm text-[#888] px-3 py-2 bg-[#2a2a35] rounded-lg border border-[#3a3a45]">
+                <span className="text-base">📊</span>
+                {totalNodeCount} nodes
+              </span>
+            
+          </div>
       </div>
 
       {/* Canvas container */}

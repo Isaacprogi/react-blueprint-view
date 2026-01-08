@@ -2,7 +2,7 @@ import React from 'react';
 
 export const TreeLegend: React.FC = () => {
   return (
-    <div className="px-5 py-4 border-t border-[#2a2a2a] bg-[#1a1a1f]">
+    <div className=" py-4 border-t border-[#2a2a2a] bg-[#1a1a1f]">
       <div className="flex w-full max-w-[95%] mx-auto flex-wrap gap-3 items-center shrink-0">
         <div className="flex items-center gap-2 text-sm text-[#a0a0a0] px-3 py-2 bg-[#2a2a35] rounded-lg border border-[#3a3a45] hover:bg-[#3a3a45] hover:border-[#4a4a55] transition-colors">
           <div className="w-4 h-4 rounded bg-[#4caf50] border border-white/10"></div>
