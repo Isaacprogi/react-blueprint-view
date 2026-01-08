@@ -34,6 +34,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import ShareFile from "./pages/ShareFile"
 
 const userIsLoggedIn = true;
 const isLoading = false;
@@ -47,12 +48,17 @@ export default function App() {
       {
         path: "/login",
         element: <Login />,
-        guestOnly: true,
+        type: "public",
       },
       {
         path: "/dashboard",
         element: <Dashboard />,
-        protected: true,
+        type: "private",
+      },
+      {
+        path: "/sharefile",
+        element: <ShareFile />,
+        type: "neutral",
       },
     ],
   );
