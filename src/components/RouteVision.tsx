@@ -136,7 +136,7 @@ export const RouteKeeperVision: React.FC<RouteVisionProps> = ({
   const keepWidth = viewMode !== "mount" && viewMode !== "issues" && viewMode !== "simulate";
 
   return (
-    <div className="font-['Fira_Code','JetBrains_Mono','Source_Code_Pro','Roboto_Mono',monospace] h-screen flex flex-col bg-[#0f0f12] text-[#e0e0e0] font-medium text-sm leading-relaxed">
+    <div className=" routekeeper-vision font-['Fira_Code','JetBrains_Mono','Source_Code_Pro','Roboto_Mono',monospace] h-screen flex flex-col bg-[#0f0f12] text-[#e0e0e0] font-medium text-sm leading-relaxed">
       {/* HEADER */}
       <div className="px-6 py-4 border-b border-[#2a2a2a] bg-[#1a1a1f] sticky top-0 z-10 flex justify-between items-center">
         <div className="flex items-center gap-3">
