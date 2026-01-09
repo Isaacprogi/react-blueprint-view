@@ -18,7 +18,7 @@ export const RouteTree: React.FC<TreeProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
   const TOP_OFFSET = 700; // space for RK + App boxes
-  const initialTransformRef = useRef<d3.ZoomTransform | null>(null);
+  
 
 
 
@@ -529,40 +529,8 @@ svg.call(zoom.transform, transform);
       .attr("font-weight", "bold")
       .text((d: any) => (expandedNodes.has(d.data.id) ? "−" : "+"));
 
-    // Auto-center on first render
-    const bounds = g.node()?.getBBox();
 
-if (
-  bounds &&
-  transform.k === 1 &&
-  transform.x === 0 &&
-  transform.y === 0 &&
-  !initialTransformRef.current
-) {
-  const scale = Math.min(
-    1,
-    (width - 200) / bounds.width,
-    (height - 200) / bounds.height
-  );
 
-  const x =
-    (width - bounds.width * scale) / 2 -
-    bounds.x * scale;
-
-  const y =
-    (height - bounds.height * scale) / 2 -
-    (bounds.y + TOP_OFFSET) * scale;
-
-  const initialTransform = d3.zoomIdentity
-    .translate(x, y)
-    .scale(scale);
-
-  // ✅ Save it ONCE
-  initialTransformRef.current = initialTransform;
-
-  svg.call(zoom.transform, initialTransform);
-  setTransform(initialTransform);
-}
 
   }, [routes, selectedNodeId, dimensions, expandedNodes, onSelect]);
 
@@ -584,23 +552,44 @@ if (
         .call(zoomRef.current.scaleBy, 0.7);
     }
   };
+const handleResetView = () => {
+  if (!svgRef.current || !zoomRef.current) return;
 
-  const handleResetView = () => {
-  if (!svgRef.current || !zoomRef.current || !initialTransformRef.current) return;
-  localStorage.removeItem("route-tree-transform");
   const svg = d3.select(svgRef.current);
+  const g = svg.select("g"); // the main group that contains all content
 
+  // Get current bounds of the entire content
+  const bounds = (g.node() as SVGGElement | null)?.getBBox();
+  if (!bounds) return;
+
+  const width = dimensions.width;
+  const height = dimensions.height;
+
+  // Calculate a transform that fits the whole tree nicely (same logic as initial centering)
+  const scale = Math.min(
+    1,
+    (width - 200) / bounds.width,
+    (height - 200) / bounds.height
+  );
+
+  const x = (width - bounds.width * scale) / 2 - bounds.x * scale;
+  const y =
+    (height - bounds.height * scale) / 2 - (bounds.y + TOP_OFFSET) * scale;
+
+  const newTransform = d3.zoomIdentity.translate(x, y).scale(scale);
+
+  // Animate to the new fitted view
   svg
     .transition()
     .duration(600)
-    .call(
-      zoomRef.current.transform,
-      initialTransformRef.current
-    );
+    .call(zoomRef.current.transform, newTransform);
 
-  setTransform(initialTransformRef.current);
+  // Update React state
+  setTransform(newTransform);
+
+  // Clear saved transform so it doesn't override next load
+  localStorage.removeItem("route-tree-transform");
 };
-
 
   const handleExpandAll = () => {
     const allIds = new Set<string>();
