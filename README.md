@@ -90,8 +90,6 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 
 “Built by Isaac Anasonye to analyze layouts and simplify debugging of messy designs.”
 
-RouteKeeper – Protecting your routes since 2025!
-
 ---
 
 <div align="center">
