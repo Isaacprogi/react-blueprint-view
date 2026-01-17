@@ -27,7 +27,7 @@ export function InternalToggle({ enabled, toggle }: Props) {
         backdropFilter: "blur(6px)",
       }}
     >
-      {enabled ? "RB ON" : "RB"}
+      {enabled ? "Blueprint ON" : "RB"}
     </button>
   );
 }
