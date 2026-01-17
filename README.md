@@ -54,14 +54,14 @@ function CustomToggle() {
 ```
 
 
-## Ignoring Elements
+<!-- ## Ignoring Elements
 
 ```jsx
 <div data-rbv-ignore>
   This element will not be affected by the blueprint overlay.
 </div>
 
-```
+``` -->
 
  “Image and video elements are excluded, meaning their content will remain visible while the blueprint is active.”
 
