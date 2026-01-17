@@ -33,6 +33,8 @@ export default defineConfig({
         "react",
         "react-dom",
         "react-router-dom",
+        "react/jsx-runtime",  
+        "react/jsx-dev-runtime", 
       ],
       output: {
         globals: {
